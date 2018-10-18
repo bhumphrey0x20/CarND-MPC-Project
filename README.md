@@ -11,8 +11,8 @@ The Model Predictive Controller (MPC) takes global way points and the vehicle st
 
 To control for latency, the current state and errors are used to estimate and state and errors at the next time step, t+1,then passed as the vehicles "state" to the MPC. The MPC calculates a cost function, based on the state and errors, and returns the acuator values that minimize the cost function. The acuator values (steering angle and acceleration) are then passed to the simulator for vehicle control.
 
-#### Time Horizon = Timestep and Elapsed Duration
-The timestep length (N) and elapsed duration (dt) used in the final implementaion was N=10.0 and dt = 0.1. Originally a N = 15.0 was used and work at slower speed (10 and 20 mph) but at faster speed the target trajectory tended to scew and resulted in vehicle occiliations. Other values were tried, N = 8 and N = 5, but these were insufficient in length for calculating a trajectory ato minimize cost function and were ustable (i.e. the vehicles occilated until it drove off the track). 
+#### Timestep and Elapsed Duration
+The timestep length (N) and elapsed duration (dt) used in the final implementaion was N = 10.0 and dt = 0.1. Originally a N = 15.0 was used and worked well at slower speed (10 and 20 mph) but at faster speed the target trajectory tended to scew too much, most notably around track curves. Other values were tried, N = 8 and N = 5, but these were insufficient in length for minimizing the cost function, resulting in unstable vehicle behavior (i.e. the vehicle occilated until it drove off the track). 
 
 A dt value of 0.1 was used because it match the simulated latency (see below). 
 
@@ -20,7 +20,9 @@ A dt value of 0.1 was used because it match the simulated latency (see below).
 Prior to MPC processing, way points from the simulator were tranformed from global coordinates to vehilce coordinates using a Homogeneous Transformation (as discussed in the particle filter project lesson 14). A 3rd degree polynomial was then fit to the transformed points using 'polyfit()' function. 
 
 #### Model Predictive Control with Latency
-Following the Slack discussion [here]("https://carnd.slack.com/archives/C54DV4BK6/p1538209080000100"), latency of 100 miliseconds was handled by calculating the a new state vector for time = t+1, using the kinematic equations disscussed in Lesson 18. The new state vector was then passed to the MPC to solve. Basically, solving control imputs for a time, one step into the future. Staying consistent with the 'dt'f value in the MPC and 100 milisecond latency, a time step of 0.1 seconds was used. 
+Following the Slack discussion [here]("https://carnd.slack.com/archives/C54DV4BK6/p1538209080000100"), latency of 100 miliseconds was handled by calculating the a new state vector for time = t+1, using the kinematic equations disscussed in Lesson 18. The new state vector was then passed to the MPC to solve. During the first new state vector calculations, the initial values of the control inputs, steering angle (`delta_1`) and acceleration (`a_1`) were set to 0. Afterwards, the control input values passed from the MPC were used to calculate the next state. 
+
+Basically, solving control imputs for a time, one step into the future. Staying consistent with the 'dt' value in the MPC and 100 milisecond latency, a time step of 0.1 seconds was used. 
 
 
 ## Dependencies

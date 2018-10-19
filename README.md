@@ -12,7 +12,7 @@ The Model Predictive Controller (MPC) takes global way points and the vehicle me
 To control for latency, the current state at time t are used to estimate the next state at time step, t+1, which is then passed to the MPC. The MPC calculates a cost function [MPC.cpp, lines 47-66], based on the state at t+1, and returns the actuator values that minimize the cost function. The acuator values (steering angle and acceleration) are then passed to the simulator for vehicle control.
 
 #### Timestep and Elapsed Duration
-The timestep length (N) and elapsed duration (dt) used in the final implementaion was N = 10.0 and dt = 0.1. Originally a N = 15.0 was used and worked well at slower speed (10 and 20 mph) but at faster speed the target trajectory tended to skew too much, most notably around track curves. Other values were tried, N = 8 and N = 5, but these were insufficient in length for minimizing the cost function, resulting in unstable vehicle behavior (i.e. the vehicle occilated until it drove off the track). 
+The timestep length (N) and elapsed duration (dt) used in the final implementaion was N = 10.0 and dt = 0.1. Originally a N = 15.0 was used and worked well at slower speed (10 and 20 mph) but at faster speed the target trajectory tended to skew too much, most notably around track curves, and the vehicle frequently drove off the road. Other values were tried, N = 8 and N = 5, but these were insufficient in length for minimizing the cost function, resulting in unstable vehicle behavior (i.e. the vehicle occilated until it drove off the track). 
 
 A dt value of 0.1 was used because it match the simulated latency (see below). 
 

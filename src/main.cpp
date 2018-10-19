@@ -123,18 +123,13 @@ int main() {
 					// calculate polynomial coeff for path
 					auto coeff = polyfit(ptsx_Eig,ptsy_Eig,3);
 
-//debug
-//cout << endl << endl << "ptsx_tx " << endl << ptsx_Eig;
-//cout << endl << endl << "ptsy_tx " << endl << ptsy_Eig;					
-//cout << endl << endl << "coeff " << endl << coeff << endl << endl;					
 
-
-					//*** calc cross-track error psi error ***//
+					//*** calc cross-track error  and psi error ***//
 					// cte is y location of vehicle evaluated at vehicles "first x position" = 0
 					double cte = coeff[0]; 
 							
 					// calc psi error, angle of vehicle
-					double epsi = psi-atan(coeff[1]); 
+					double epsi = -atan(coeff[1]); 
 					
 
 // For Latency: Calculating future state t+1, and passing values to "curr" state to apply to solver
@@ -163,7 +158,7 @@ int main() {
 					// fill state vector with current state and pass to mpc solver
 					Eigen::VectorXd state = Eigen::VectorXd(6);
 					state << x1, y1, psi1, v1, cte1, epsi1;
-					//state << 0,0,0, v1, cte, epsi;
+					
 
 					auto solved_var = mpc.Solve(state, coeff);
 	
@@ -199,7 +194,6 @@ int main() {
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Green line
 					
-
           msgJson["mpc_x"] = mpc_x_vals;
           msgJson["mpc_y"] = mpc_y_vals;
 

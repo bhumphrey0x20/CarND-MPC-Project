@@ -27,8 +27,15 @@ Staying consistent with the `dt` value in the MPC and the 100 milisecond latency
 ### Simulation
 The videos show the vehicle controled by the MPC using a referene velocity of 40 mph, 50 mph, and 60 mph. Speed of 40 and 50 mph were the most stabile. 60 mph showed some instabilities, especially for distances beyond a single lap. 
 
+#### MPC with Reference Velocity = 40 mph
+<a href="https://youtu.be/0DWluA2ewlE" target="_blank"><img src="https://i.ytimg.com/vi/0DWluA2ewlE/2.jpg" alt="Advanced Lane Finding Video" width="240" height="180" border="10" /></a>
 
-<a href="https://youtu.be/0DWluA2ewlE" target="_blank"><img src="https://youtu.be/0DWluA2ewlE/2.jpg" alt="Advanced Lane Finding Video" width="240" height="180" border="10" /></a>
+#### MPC with Reference Velocity = 50 mph
+<a href="https://youtu.be/iAqVNRjBwpk" target="_blank"><img src="https://i.ytimg.com/vi/iAqVNRjBwpk/2.jpg" alt="Advanced Lane Finding Video" width="240" height="180" border="10" /></a>
+
+
+#### MPC with Reference Velocity = 60 mph
+<a href="https://youtu.be/Z4fPixGIVi4" target="_blank"><img src="https://i.ytimg.com/vi/Z4fPixGIVi4/2.jpg" alt="Advanced Lane Finding Video" width="240" height="180" border="10" /></a>
 
 
 ## Dependencies

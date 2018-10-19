@@ -7,9 +7,9 @@ Self-Driving Car Engineer Nanodegree Program
 
 ### Implementaion:
 #### Model
-The Model Predictive Controller (MPC) takes global way points and the vehicle measurements provided by the simulator and uses these to calculate the cross-track error (CTE) and psi error (EPSI). The measurements and errors are used to create a state vecotr: [x, y, psi, v, cte, epsi]. Way Points are transformed from Global map coordinates to vehicle coordinates, and a 3rd-degree polynomial is fit to the points to yield a desired trajectory. 
+The Model Predictive Controller (MPC) takes global way points and the vehicle measurements provided by the simulator and uses these to calculate the cross-track error (CTE) and psi error (EPSI) [main.cpp, lines 129-133]. The measurements and errors are used to create a state vecotr: [x, y, psi, v, cte, epsi]. Way Points are transformed from Global map coordinates to vehicle coordinates, and a 3rd-degree polynomial is fit to the points to yield a desired trajectory. 
 
-To control for latency, the current state at time t are used to estimate the next state at time step, t+1, which is then passed to the MPC. The MPC calculates a cost function, based on the state at t+1, and returns the actuator values that minimize the cost function. The acuator values (steering angle and acceleration) are then passed to the simulator for vehicle control.
+To control for latency, the current state at time t are used to estimate the next state at time step, t+1, which is then passed to the MPC. The MPC calculates a cost function [MPC.cpp, lines 47-66], based on the state at t+1, and returns the actuator values that minimize the cost function. The acuator values (steering angle and acceleration) are then passed to the simulator for vehicle control.
 
 #### Timestep and Elapsed Duration
 The timestep length (N) and elapsed duration (dt) used in the final implementaion was N = 10.0 and dt = 0.1. Originally a N = 15.0 was used and worked well at slower speed (10 and 20 mph) but at faster speed the target trajectory tended to skew too much, most notably around track curves. Other values were tried, N = 8 and N = 5, but these were insufficient in length for minimizing the cost function, resulting in unstable vehicle behavior (i.e. the vehicle occilated until it drove off the track). 
@@ -17,10 +17,10 @@ The timestep length (N) and elapsed duration (dt) used in the final implementaio
 A dt value of 0.1 was used because it match the simulated latency (see below). 
 
 #### Polynomial Fitting and MPC Preprocessing
-Prior to MPC processing, way points from the simulator were tranformed from global coordinates to vehilce coordinates using a Homogeneous Transformation (as discussed in the particle filter project, Lesson 14). A 3rd degree polynomial was then fit to the transformed points using 'polyfit()' function. 
+Prior to MPC processing, way points from the simulator were tranformed from global coordinates to vehilce coordinates using a Homogeneous Transformation (as discussed in the particle filter project, Lesson 14) [main.cpp, lines 115-121]. A 3rd degree polynomial was then fit to the transformed points using 'polyfit()' function [main.cpp, lines 124]. 
 
 #### Model Predictive Control with Latency
-Following the Slack discussion [here]("https://carnd.slack.com/archives/C54DV4BK6/p1538209080000100"), a latency of 100 miliseconds was handled by calculating a new state vector for time = t+1, using the kinematic equations disscussed in Lesson 18. The new state vector was then passed to the MPC. During the first new state vector calculations, the initial values of the control inputs, steering angle (`delta_1`) and acceleration (`a_1`) were set to 0. Afterwards, the control input values returned from the MPC were stored input into the kinematic equations calculate the next state: basically, solving control inputs for a time, one step into the future. 
+Following the Slack discussion [here]("https://carnd.slack.com/archives/C54DV4BK6/p1538209080000100"), a latency of 100 miliseconds was handled by calculating a new state vector for time = t+1, using the kinematic equations disscussed in Lesson 18. The new state vector was then passed to the MPC. During the first new state vector calculations, the initial values of the control inputs, steering angle (`delta_1`) and acceleration (`a_1`) were set to 0 [main.cpp, lines 135-160]. Afterwards, the control input values returned from the MPC were stored and used the kinematic equations, in the next callback loop, to calculate the next state: basically, solving control inputs for a time, one step into the future [main.cpp, lines 166-167]. 
 
 Staying consistent with the 'dt' value in the MPC and the 100 milisecond latency, a time step of 0.1 seconds was used. 
 

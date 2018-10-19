@@ -7,25 +7,25 @@ Self-Driving Car Engineer Nanodegree Program
 
 ### Implementaion:
 #### Model
-The Model Predictive Controller (MPC) takes global way points and the vehicle measurements provided by the simulator and uses these to calculate the cross-track error (CTE) and psi error (EPSI) [main.cpp, lines 129-133]. The measurements and errors are used to create a state vecotr: [x, y, psi, v, cte, epsi]. Way Points are transformed from Global map coordinates to vehicle coordinates, and a 3rd-degree polynomial is fit to the points to yield a desired trajectory. 
+The Model Predictive Controller (MPC) takes global way points and the vehicle measurements provided by the simulator and uses these to calculate the cross-track error (CTE) and psi error (EPSI) [main.cpp, lines 129-133]. The measurements and errors are used to create a state vector: [x, y, psi, v, cte, epsi]. Way points are transformed from global map coordinates to vehicle coordinates, and a 3rd-degree polynomial is fit to the points to yield a desired trajectory. 
 
-To control for latency, the current state at time t are used to estimate the next state at time step, t+1, which is then passed to the MPC. The MPC calculates a cost function [MPC.cpp, lines 47-66], based on the state at t+1, and returns the actuator values that minimize the cost function. The acuator values (steering angle and acceleration) are then passed to the simulator for vehicle control.
+To control for latency, the current state at time t are used to estimate the next state at timestep t+1, which is then passed to the MPC. The MPC calculates a cost function [MPC.cpp, lines 47-66], based on the state at t+1, and returns the actuator values that minimize the cost function. The acuator values (steering angle and acceleration) are then passed to the simulator for vehicle control.
 
 #### Timestep and Elapsed Duration
-The timestep length (N) and elapsed duration (dt) used in the final implementaion was N = 10.0 and dt = 0.1. Originally a N = 15.0 was used and worked well at slower speed (10 and 20 mph) but at faster speed the target trajectory tended to skew too much, most notably around track curves, and the vehicle frequently drove off the road. Other values were tried, N = 8 and N = 5, but these were insufficient in length for minimizing the cost function, resulting in unstable vehicle behavior (i.e. the vehicle occilated until it drove off the track). 
+The timestep length (N) and elapsed duration (dt) used in the final implementaion was N = 10.0 and dt = 0.1. Originally an N = 15.0 was used and worked well at slower speed (10 and 20 mph) but at faster speed the target trajectory tended to skew too much, most notably around track curves, and the vehicle frequently drove off the road. Other values were tried, N = 8 and N = 5, but these were insufficient in length for minimizing the cost function, resulting in unstable vehicle behavior (i.e. the vehicle drove off the track). 
 
 A dt value of 0.1 was used because it match the simulated latency (see below). 
 
 #### Polynomial Fitting and MPC Preprocessing
-Prior to MPC processing, way points from the simulator were tranformed from global coordinates to vehilce coordinates using a Homogeneous Transformation (as discussed in the particle filter project, Lesson 14) [main.cpp, lines 115-121]. A 3rd degree polynomial was then fit to the transformed points using 'polyfit()' function [main.cpp, lines 124]. 
+Prior to MPC processing, way points from the simulator were tranformed from global coordinates to vehilce coordinates using a Homogeneous Transformation (as discussed in the particle filter project, Lesson 14) [main.cpp, lines 115-121]. A 3rd degree polynomial was then fit to the transformed points using  the `polyfit()` function [main.cpp, lines 124]. 
 
 #### Model Predictive Control with Latency
-Following the Slack discussion [here]("https://carnd.slack.com/archives/C54DV4BK6/p1538209080000100"), a latency of 100 miliseconds was handled by calculating a new state vector for time = t+1, using the kinematic equations disscussed in Lesson 18 [main.cpp, lines 135-160]. The new state vector was then passed to the MPC. During the first new state vector calculations, the initial values of the control inputs, steering angle (`delta_1`) and acceleration (`a_1`) were set to 0. Afterwards, the control input values returned from the MPC were stored and used the kinematic equations, in the next callback loop, to calculate the next state: basically, solving control inputs for a time, one step into the future [main.cpp, lines 166-167]. 
+Following the Slack discussion [here]("https://carnd.slack.com/archives/C54DV4BK6/p1538209080000100"), a latency of 100 milliseconds was handled by calculating a new state vector for time = t+1, using the kinematic equations disscussed in Lesson 18 [main.cpp, lines 135-160]. The new state vector was then passed to the MPC. During the first new state vector calculations, the initial values of the control inputs- steering angle (`delta_1`) and acceleration (`a_1`)- were set to 0. Afterwards, the control input values returned from the MPC were stored and used in the kinematic equations during the next callback loop, to calculate the next state: basically, solving control inputs for a time, one step into the future [main.cpp, lines 166-167]. 
 
-Staying consistent with the `dt` value in the MPC and the 100 milisecond latency, a time step of 0.1 seconds was used. 
+Staying consistent with the `dt` value in the MPC and the 100 millisecond latency, a time step `dt` of 0.1 seconds was used as a "delta t" in the kinematic equations [main.cpp, lines 19, 150-155].  
 
 ### Simulation
-The videos show the vehicle controled by the MPC using a referene velocity of 40 mph, 50 mph, and 60 mph. Speed of 40 and 50 mph were the most stabile. 60 mph showed some instabilities, especially for distances beyond a single lap. 
+The videos show the vehicle controled by the MPC using reference velocities of 40 mph, 50 mph, and 60 mph. Speeds near 40 and 50 mph were the most stable. At speeds of around 60 mph instabilities were intermittant (not shown in video), especially for distances beyond a single lap. 
 
 #### MPC with Reference Velocity = 40 mph
 <a href="https://youtu.be/0DWluA2ewlE" target="_blank"><img src="https://i.ytimg.com/vi/0DWluA2ewlE/2.jpg" alt="Advanced Lane Finding Video" width="240" height="180" border="10" /></a>

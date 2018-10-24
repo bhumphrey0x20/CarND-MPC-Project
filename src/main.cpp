@@ -8,6 +8,21 @@
 #include "Eigen-3.3/Eigen/QR"
 #include "MPC.h"
 #include "json.hpp"
+#include <ctime>
+#include <ratio>
+#include <chrono>
+#include <fstream>
+
+using namespace std; 
+using namespace chrono;
+
+// create output file to track processing time
+fstream fout;
+bool write_time_data = false; // set to true to print out processing time of MPC
+
+	// set variables for time
+	// time from http://www.cplusplus.com/reference/chrono/steady_clock/
+	chrono::steady_clock::time_point t0, t1;
 
 //Variable to hold steering Angle and accel values at t+1, 
 // used for latency calculations
@@ -16,7 +31,7 @@ double a_1 = 0;
 
 // Variables to handle kinematic calc for latency
 // dt is time step and also cooresponds to simulator latency 100 ms
-double dt_ = 0.1;
+double dt_ = 0.15;
 double Lf_ = 2.67;
 
 // for convenience
@@ -81,6 +96,15 @@ int main() {
   // MPC is initialized here!
   MPC mpc;
 
+if(write_time_data){
+		fout.open("./mpc_t.dat",ios::out);
+		if(!fout.is_open()){
+			cout << "file not open, cannot write." << endl << endl;
+			write_time_data = true;
+		}
+	}
+
+
   h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -130,6 +154,11 @@ int main() {
 							
 					// calc psi error, angle of vehicle
 					double epsi = -atan(coeff[1]); 
+
+//debug
+cout << "Coeff:" << endl << coeff << endl << endl;
+cout << "cte: " << cte << endl << "epsi: " << epsi << endl;
+
 					
 
 // For Latency: Calculating future state t+1, and passing values to "curr" state to apply to solver
@@ -152,16 +181,20 @@ int main() {
 					psi1 = psi0 - v/Lf_* delta_1 * dt_;
 					v1 = v + a_1* dt_;					
 					cte1 = cte + v * sin(epsi)* dt_;
-					epsi1 = epsi + v * delta_1 * dt_/Lf_; 
+					epsi1 = epsi - v/Lf_ * delta_1 * dt_; 
 					
 				
 					// fill state vector with current state and pass to mpc solver
 					Eigen::VectorXd state = Eigen::VectorXd(6);
 					state << x1, y1, psi1, v1, cte1, epsi1;
 					
-
+					// get time duration of mpc solver
+					t0 = steady_clock::now();
 					auto solved_var = mpc.Solve(state, coeff);
-	
+					t1 = steady_clock::now();
+					duration<double> elapsed_t = duration_cast<duration<double>>(t1 - t0);
+					fout << elapsed_t.count() << endl;
+
 					// set steer angle and acc for use in calculating,  next time step for latency handling
 					delta_1 = solved_var[0];
 					a_1 = solved_var[1];

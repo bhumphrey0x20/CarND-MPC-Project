@@ -47,7 +47,7 @@ Staying consistent with the `dt` value in the MPC a time step `dt` of 0.15 secon
 The videos show the vehicle controled by the MPC using reference velocities of 40 mph, 50 mph, and 60 mph. Speeds near 40 and 50 mph were the most stable. At speeds of around 60 mph instabilities were intermittant (not shown in video), especially for distances beyond a single lap. 
 
 #### MPC with Reference Velocity = 30 mph
-<a href="https://https://youtu.be/OTB-UnRqayc" target="_blank"><img src="https://i.ytimg.com/vi/OTB-UnRqayc/2.jpg" alt="Advanced Lane Finding Video" width="240" height="180" border="10" /></a>
+<a href="https://youtu.be/OTB-UnRqayc" target="_blank"><img src="https://i.ytimg.com/vi/OTB-UnRqayc/2.jpg" alt="Advanced Lane Finding Video" width="240" height="180" border="10" /></a>
 
 
 ## Dependencies

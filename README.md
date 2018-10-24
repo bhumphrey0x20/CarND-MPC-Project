@@ -7,9 +7,17 @@ Self-Driving Car Engineer Nanodegree Program
 
 ### Implementaion:
 #### Model
-The Model Predictive Controller (MPC) takes global way points and the vehicle measurements provided by the simulator and uses these to calculate the cross-track error (CTE) and psi error (EPSI) [main.cpp, lines 129-133]. The measurements and errors are used to create a state vector: [x, y, psi, v, cte, epsi]. Way points are transformed from global map coordinates to vehicle coordinates, and a 3rd-degree polynomial is fit to the points to yield a desired trajectory. 
+The Model Predictive Controller (MPC) takes global way points and the vehicle measurements provided by the simulator and uses these to calculate the cross-track error (CTE) and psi error (EPSI) [main.cpp, lines 129-133]. The measurements and errors are used to create a state vector: [x, y, psi, v, cte, epsi]; where x and y are the position of the car, psi is the orientation of the car, v is the current linear velocity. CTE is calcuated as the difference between the center of the lane and the car's position along the y-axis: `cte = y - f(x)`, where y = 0 and f(x) is the vehicles y position, according the the fitted polynomials discussed below. The simulator measures negative angles as counter-clockwise, so the cte becomes `f(x) - y`. The epsi the is the difference between desired orientation (a straight line) and the actual car's orientation. 
 
-To control for latency, the current state at time t are used to estimate the next state at timestep t+1, which is then passed to the MPC. The MPC calculates a cost function [MPC.cpp, lines 47-66], based on the state at t+1, and returns the actuator values that minimize the cost function. The acuator values (steering angle and acceleration) are then passed to the simulator for vehicle control.
+Way points, received from the simulator, are transformed from global map coordinates to vehicle coordinates, and a 3rd-degree polynomial is fit to the points to yield a desired trajectory. To control for latency, the current state at time t are used to estimate the next state at timestep t+1, which is then passed to the MPC. 
+
+The MPC calculates a cost function [MPC.cpp, lines 47-66], based on the state at t+1, and returns the actuator values that minimize the cost function. The update equations are listed below. The MPC uses these equations as constraints on the solver, taking the results from the calculated next time step and subtracting the update equation at time step t (MPC.cpp, lines 120-127) forcing the result, stored in fg, to be zero. 
+
+Actuators include the steering angle, `delta` and acceleration `a`. The steering angles has a maximum and minimum value set to +/- 0.436332 radians (+/- 25 degrees) and acceleration max and mins are set to +/- 1 (MPC.cpp, lines 193-203).
+
+The acuator values (steering angle and acceleration) are then passed to the simulator for vehicle control.
+
+
 
 #### Timestep and Elapsed Duration
 The timestep length (N) and elapsed duration (dt) used in the final implementaion was N = 10.0 and dt = 0.1. Originally an N = 15.0 was used and worked well at slower speed (10 and 20 mph) but at faster speed the target trajectory tended to skew too much, most notably around track curves, and the vehicle frequently drove off the road. Other values were tried, N = 8 and N = 5, but these were insufficient in length for minimizing the cost function, resulting in unstable vehicle behavior (i.e. the vehicle drove off the track). 

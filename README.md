@@ -13,6 +13,10 @@ Way points, received from the simulator, are transformed from global map coordin
 
 The MPC calculates a cost function [MPC.cpp, lines 47-66], based on the state at t+1, and returns the actuator values that minimize the cost function. The update equations are listed below. The MPC uses these equations as constraints on the solver, taking the results from the calculated next time step and subtracting the update equation at time step t (MPC.cpp, lines 120-127) forcing the result, stored in fg, to be zero. 
 
+#### Figure 3: Update Equation (taken from Lesson 19, section 6)
+<img src="https://github.com/bhumphrey0x20/CarND-MPC-Project/blob/master/ModelEqns.png" height="195" width="302" />
+
+
 Actuators include the steering angle, `delta` and acceleration `a`. The steering angle has a maximum and minimum value set to +/- 0.436332 radians (+/- 25 degrees) and acceleration maximum and minimum of +/- 1 (MPC.cpp, lines 193-203). The MPC finds the acuator values (steering angle and acceleration) that minimize the cost function. These values are then passed to the simulator for vehicle control.
 
 
@@ -42,15 +46,8 @@ Staying consistent with the `dt` value in the MPC a time step `dt` of 0.15 secon
 ### Simulation
 The videos show the vehicle controled by the MPC using reference velocities of 40 mph, 50 mph, and 60 mph. Speeds near 40 and 50 mph were the most stable. At speeds of around 60 mph instabilities were intermittant (not shown in video), especially for distances beyond a single lap. 
 
-#### MPC with Reference Velocity = 40 mph
-<a href="https://youtu.be/0DWluA2ewlE" target="_blank"><img src="https://i.ytimg.com/vi/0DWluA2ewlE/2.jpg" alt="Advanced Lane Finding Video" width="240" height="180" border="10" /></a>
-
-#### MPC with Reference Velocity = 50 mph
-<a href="https://youtu.be/iAqVNRjBwpk" target="_blank"><img src="https://i.ytimg.com/vi/iAqVNRjBwpk/2.jpg" alt="Advanced Lane Finding Video" width="240" height="180" border="10" /></a>
-
-
-#### MPC with Reference Velocity = 60 mph
-<a href="https://youtu.be/Z4fPixGIVi4" target="_blank"><img src="https://i.ytimg.com/vi/Z4fPixGIVi4/2.jpg" alt="Advanced Lane Finding Video" width="240" height="180" border="10" /></a>
+#### MPC with Reference Velocity = 30 mph
+<a href="https://https://youtu.be/OTB-UnRqayc" target="_blank"><img src="https://i.ytimg.com/vi/OTB-UnRqayc/2.jpg" alt="Advanced Lane Finding Video" width="240" height="180" border="10" /></a>
 
 
 ## Dependencies

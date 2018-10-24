@@ -7,24 +7,28 @@ Self-Driving Car Engineer Nanodegree Program
 
 ### Implementaion:
 #### Model
-The Model Predictive Controller (MPC) takes global way points and the vehicle measurements provided by the simulator and uses these to calculate the cross-track error (CTE) and psi error (EPSI) [main.cpp, lines 129-133]. The measurements and errors are used to create a state vector: [x, y, psi, v, cte, epsi]; where x and y are the position of the car, psi is the orientation of the car, v is the current linear velocity. CTE is calcuated as the difference between the center of the lane and the car's position along the y-axis: `cte = y - f(x)`, where y = 0 and f(x) is the vehicles y position, according the the fitted polynomials discussed below. The simulator measures negative angles as counter-clockwise, so the cte becomes `f(x) - y`. The epsi the is the difference between desired orientation (a straight line) and the actual car's orientation. 
+The Model Predictive Controller (MPC) takes global way points and the vehicle measurements provided by the simulator and uses these to calculate the cross-track error (CTE) and psi error (EPSI) [main.cpp, lines 129-133]. The measurements and errors are used to create a state vector: [x, y, psi, v, cte, epsi]; where x and y are the position of the car on the track, psi is the orientation of the car, v is the current linear speed. CTE is calcuated as the difference between the center of the lane and the car's position along the y-axis: `cte = y - f(x)`, where y = 0 and f(x) is the vehicles y position, according the the fitted polynomials discussed below [Note: Since the simulator measures negative angles as counter-clockwise, so the cte becomes `f(x) - y`]. The epsi the is the difference between desired orientation (a straight line) and the actual car's orientation. 
 
-Way points, received from the simulator, are transformed from global map coordinates to vehicle coordinates, and a 3rd-degree polynomial is fit to the points to yield a desired trajectory. To control for latency, the current state at time t are used to estimate the next state at timestep t+1, which is then passed to the MPC. 
+Way points, received from the simulator, are transformed from global map coordinates to vehicle coordinates, and a 3rd-degree polynomial is fit to the points to yield a desired trajectory. To control for latency, the current state at time t is used to estimate the next state at timestep t+1, which is then passed to the MPC. 
 
 The MPC calculates a cost function [MPC.cpp, lines 47-66], based on the state at t+1, and returns the actuator values that minimize the cost function. The update equations are listed below. The MPC uses these equations as constraints on the solver, taking the results from the calculated next time step and subtracting the update equation at time step t (MPC.cpp, lines 120-127) forcing the result, stored in fg, to be zero. 
 
-Actuators include the steering angle, `delta` and acceleration `a`. The steering angles has a maximum and minimum value set to +/- 0.436332 radians (+/- 25 degrees) and acceleration max and mins are set to +/- 1 (MPC.cpp, lines 193-203). The MPC finds the acuator values (steering angle and acceleration) that minimize to cost function. These values are then passed to the simulator for vehicle control.
+Actuators include the steering angle, `delta` and acceleration `a`. The steering angle has a maximum and minimum value set to +/- 0.436332 radians (+/- 25 degrees) and acceleration maximum and minimum of +/- 1 (MPC.cpp, lines 193-203). The MPC finds the acuator values (steering angle and acceleration) that minimize the cost function. These values are then passed to the simulator for vehicle control.
 
 
 #### Timestep and Elapsed Duration
-The Time Horizon, T = N * dt, is the how far ahead in the future the vehicles calculated path is projected. Here N is the number of future time steps and dt is the time between each step, or between each actuation. N is used to set the size of the vector optimized by the MPC: `vector size = N * [Number of States] + (N-1) * [Number of Actuators]`. Here the number of states is 6 and the number of actuators is 2. For each unit increase in N the size of the this vector increases by 8. Additionally, increasing N increases the optimization time of the MPC. 
+The Time Horizon, `T = N * dt`, is the how far ahead in the future the vehicle's calculated path is projected. Here N is the number of future time steps and dt is the time between each step, or between each actuation. N is used to set the size of the vector optimized by the MPC: 
 
-`dt` was the time changed used in the update equations and determines the resolution of the projected path. A small `dt` yields a small time change between predicted values, while a large `dt` increases the error between the desired path and the estimated path. 
+`vector size = N * [Number of States] + (N-1) * [Number of Actuators]`. 
 
-For this project, values for N and dt were chosen to keep T relatively low ( <= 1.5 seconds). In the final implementaion an N = 7 and a dt = 0.15 was used based on quality of driving and a lower average MPC processing time (approximately 9.05 milliseconds). N-values between 5 and 15 were tested using dt-values of 0.05 and 0.2. N values of 15 worked well at slower speed (10 and 20 mph) but at faster speed the predicted trajectory tended to skew too much resulting in the vehicle frequently drove off the road.
-N value of 5 was too short of a projection ahd the car occillated too much. 
+Here the number of states is 6 and the number of actuators is 2. For each unit increase in N the size of the vector optimized by the MPC increases by 8. This in turn increases the processing time of the MPC. 
 
-dt values between 0.15 and 0.75 tended to work the best with various N values. dt values of 0.2 tended to make the car "hug" the side of the road too much (too much straightline projection between time steps) especially around curves where the vehicle tended to drive over the line and onto the curb. Values less than 0.075 made the car occilate and crash. 
+dt is the time changed used in the update equations and determines the resolution of the projected path. A small dt yields a small time change between predicted values and more accurately projects the trajectory/path, while a large dt increases the error between the desired path and the estimated path. 
+
+For this project, values for N and dt were chosen to keep T relatively low ( <= 1.5 seconds). In the final implementaion an N = 7 and a dt = 0.15 was used based on quality of driving and a lower average MPC processing time (approximately 9.05 milliseconds). N values between 5 and 15 were tested using dt values between 0.05 and 0.2. N values of 15 worked well at slower speed (10 and 20 mph) but at faster speed the projected trajectory tended to skew too much resulting in the vehicle frequently drove off the road.
+N value of 5 was too short of a projection, causing the car occillated too much and crash. 
+
+dt values between 0.15 and 0.75 tended to work the best with various N values. dt values of 0.2 tended to make the car "hug" the side of the road (too much straightline projection between time steps) especially around curves where the vehicle tended to drive over the line and onto the curb. Values less than 0.075 made the car occilate and crash. 
  
 
 #### Polynomial Fitting and MPC Preprocessing
@@ -33,7 +37,7 @@ Prior to MPC processing, way points from the simulator were tranformed from glob
 #### Model Predictive Control with Latency
 Following the Slack discussion [here]("https://carnd.slack.com/archives/C54DV4BK6/p1538209080000100"), a latency of 100 milliseconds was handled by calculating a new state vector for time = t+1, using the kinematic equations disscussed in Lesson 18 [main.cpp, lines 135-160]. The new state vector was then passed to the MPC. During the first new state vector calculations, the initial values of the control inputs- steering angle (`delta_1`) and acceleration (`a_1`)- were set to 0. Afterwards, the control input values returned from the MPC were stored and used in the kinematic equations during the next callback loop, to calculate the next state: basically, solving control inputs for a time, one step into the future [main.cpp, lines 166-167]. 
 
-Staying consistent with the `dt` value in the MPC and the 100 millisecond latency, a time step `dt` of 0.1 seconds was used as a "delta t" in the kinematic equations [main.cpp, lines 19, 150-155].  
+Staying consistent with the `dt` value in the MPC a time step `dt` of 0.15 seconds was used as a "delta t" in the kinematic equations [main.cpp, lines 19, 150-155].  
 
 ### Simulation
 The videos show the vehicle controled by the MPC using reference velocities of 40 mph, 50 mph, and 60 mph. Speeds near 40 and 50 mph were the most stable. At speeds of around 60 mph instabilities were intermittant (not shown in video), especially for distances beyond a single lap. 

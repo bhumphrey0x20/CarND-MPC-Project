@@ -13,16 +13,19 @@ Way points, received from the simulator, are transformed from global map coordin
 
 The MPC calculates a cost function [MPC.cpp, lines 47-66], based on the state at t+1, and returns the actuator values that minimize the cost function. The update equations are listed below. The MPC uses these equations as constraints on the solver, taking the results from the calculated next time step and subtracting the update equation at time step t (MPC.cpp, lines 120-127) forcing the result, stored in fg, to be zero. 
 
-Actuators include the steering angle, `delta` and acceleration `a`. The steering angles has a maximum and minimum value set to +/- 0.436332 radians (+/- 25 degrees) and acceleration max and mins are set to +/- 1 (MPC.cpp, lines 193-203).
-
-The acuator values (steering angle and acceleration) are then passed to the simulator for vehicle control.
-
+Actuators include the steering angle, `delta` and acceleration `a`. The steering angles has a maximum and minimum value set to +/- 0.436332 radians (+/- 25 degrees) and acceleration max and mins are set to +/- 1 (MPC.cpp, lines 193-203). The MPC finds the acuator values (steering angle and acceleration) that minimize to cost function. These values are then passed to the simulator for vehicle control.
 
 
 #### Timestep and Elapsed Duration
-The timestep length (N) and elapsed duration (dt) used in the final implementaion was N = 10.0 and dt = 0.1. Originally an N = 15.0 was used and worked well at slower speed (10 and 20 mph) but at faster speed the target trajectory tended to skew too much, most notably around track curves, and the vehicle frequently drove off the road. Other values were tried, N = 8 and N = 5, but these were insufficient in length for minimizing the cost function, resulting in unstable vehicle behavior (i.e. the vehicle drove off the track). 
+The Time Horizon, T = N * dt, is the how far ahead in the future the vehicles calculated path is projected. Here N is the number of future time steps and dt is the time between each step, or between each actuation. N is used to set the size of the vector optimized by the MPC: `vector size = N * [Number of States] + (N-1) * [Number of Actuators]`. Here the number of states is 6 and the number of actuators is 2. For each unit increase in N the size of the this vector increases by 8. Additionally, increasing N increases the optimization time of the MPC. 
 
-A dt value of 0.1 was used because it match the simulated latency (see below). 
+`dt` was the time changed used in the update equations and determines the resolution of the projected path. A small `dt` yields a small time change between predicted values, while a large `dt` increases the error between the desired path and the estimated path. 
+
+For this project, values for N and dt were chosen to keep T relatively low ( <= 1.5 seconds). In the final implementaion an N = 7 and a dt = 0.15 was used based on quality of driving and a lower average MPC processing time (approximately 9.05 milliseconds). N-values between 5 and 15 were tested using dt-values of 0.05 and 0.2. N values of 15 worked well at slower speed (10 and 20 mph) but at faster speed the predicted trajectory tended to skew too much resulting in the vehicle frequently drove off the road.
+N value of 5 was too short of a projection ahd the car occillated too much. 
+
+dt values between 0.15 and 0.75 tended to work the best with various N values. dt values of 0.2 tended to make the car "hug" the side of the road too much (too much straightline projection between time steps) especially around curves where the vehicle tended to drive over the line and onto the curb. Values less than 0.075 made the car occilate and crash. 
+ 
 
 #### Polynomial Fitting and MPC Preprocessing
 Prior to MPC processing, way points from the simulator were tranformed from global coordinates to vehilce coordinates using a Homogeneous Transformation (as discussed in the particle filter project, Lesson 14) [main.cpp, lines 115-121]. A 3rd degree polynomial was then fit to the transformed points using  the `polyfit()` function [main.cpp, lines 124]. 

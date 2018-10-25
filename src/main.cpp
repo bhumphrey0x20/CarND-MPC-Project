@@ -20,7 +20,7 @@ using namespace chrono;
 fstream fout;
 
 // set to true to print out processing time of MPC
-bool write_time_data = true; 
+bool write_time_data = false; 
 
 // set variables for time
 // time from http://www.cplusplus.com/reference/chrono/steady_clock/

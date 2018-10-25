@@ -151,10 +151,10 @@ if(write_time_data){
 
 
 					//*** calc cross-track error  and psi error ***//
-					// cte is y location of vehicle evaluated at vehicles "first x position" = 0
+					// cte is y - f(x), desired - trajectory evaluated at car position, px=0
 					double cte = polyeval(coeff, 0); // ==> double cte = coeff[0]; 
 							
-					// calc psi error, angle of vehicle
+					// calc psi error, [angle of vehicle] - [desired angle (straight line)], at px = 0, py = 0
 					double epsi = -atan(coeff[1]); 
 
 //debug

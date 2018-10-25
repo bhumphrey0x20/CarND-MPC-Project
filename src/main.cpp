@@ -18,11 +18,13 @@ using namespace chrono;
 
 // create output file to track processing time
 fstream fout;
-bool write_time_data = false; // set to true to print out processing time of MPC
 
-	// set variables for time
-	// time from http://www.cplusplus.com/reference/chrono/steady_clock/
-	chrono::steady_clock::time_point t0, t1;
+// set to true to print out processing time of MPC
+bool write_time_data = true; 
+
+// set variables for time
+// time from http://www.cplusplus.com/reference/chrono/steady_clock/
+chrono::steady_clock::time_point t0, t1;
 
 //Variable to hold steering Angle and accel values at t+1, 
 // used for latency calculations
@@ -150,14 +152,14 @@ if(write_time_data){
 
 					//*** calc cross-track error  and psi error ***//
 					// cte is y location of vehicle evaluated at vehicles "first x position" = 0
-					double cte = coeff[0]; 
+					double cte = polyeval(coeff, 0); // ==> double cte = coeff[0]; 
 							
 					// calc psi error, angle of vehicle
 					double epsi = -atan(coeff[1]); 
 
 //debug
-cout << "Coeff:" << endl << coeff << endl << endl;
-cout << "cte: " << cte << endl << "epsi: " << epsi << endl;
+//cout << "Coeff:" << endl << coeff << endl << endl;
+//cout << "cte: " << cte << endl << "epsi: " << epsi << endl;
 
 					
 
@@ -189,11 +191,16 @@ cout << "cte: " << cte << endl << "epsi: " << epsi << endl;
 					state << x1, y1, psi1, v1, cte1, epsi1;
 					
 					// get time duration of mpc solver
-					t0 = steady_clock::now();
-					auto solved_var = mpc.Solve(state, coeff);
-					t1 = steady_clock::now();
-					duration<double> elapsed_t = duration_cast<duration<double>>(t1 - t0);
-					fout << elapsed_t.count() << endl;
+					vector<double> solved_var; 
+					if(write_time_data){
+						t0 = steady_clock::now();
+						solved_var = mpc.Solve(state, coeff);
+						t1 = steady_clock::now();
+						duration<double> elapsed_t = duration_cast<duration<double>>(t1 - t0);
+						fout << elapsed_t.count() << endl;
+					}else{
+						solved_var = mpc.Solve(state, coeff);
+					}
 
 					// set steer angle and acc for use in calculating,  next time step for latency handling
 					delta_1 = solved_var[0];

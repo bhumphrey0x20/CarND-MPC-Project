@@ -7,13 +7,13 @@ Self-Driving Car Engineer Nanodegree Program
 
 ### Implementaion:
 #### Model
-The Model Predictive Controller (MPC) takes global way points and the vehicle measurements provided by the simulator and uses these to calculate the cross-track error (CTE) and psi error (EPSI) [main.cpp, lines 129-133]. The measurements and errors are used to create a state vector: [x, y, psi, v, cte, epsi]; where x and y are the position of the car on the track, psi is the orientation of the car, v is the current linear speed. CTE is calcuated as the difference between the center of the lane and the car's position along the y-axis: `cte = y - f(x)`, where y = 0 and f(x) is the vehicles y position, according the the fitted polynomials discussed below [Note: Since the simulator measures negative angles as counter-clockwise, so the cte becomes `f(x) - y`]. The epsi the is the difference between desired orientation (a straight line) and the actual car's orientation. 
+The Model Predictive Controller (MPC) takes global way points and the vehicle measurements provided by the simulator and uses these to calculate the cross-track error (CTE) and psi error (EPSI) [main.cpp, lines 122-158]. The measurements and errors are used to create a state vector: [x, y, psi, v, cte, epsi]; where x and y are the position of the car on the track, psi is the orientation of the car, v is the current linear speed. CTE is calcuated as the difference between the center of the lane, the desired position, and the car's position along the y-axis: `cte = y - f(x)`, where y = 0 is the desired position and f(x) is the vehicles y position, according the the fitted polynomials discussed below [Note: Since the simulator measures negative angles as counter-clockwise, the cte equation becomes `f(x) - y`]. The epsi the is the difference between desired orientation (a straight line) and the actual car's orientation. 
 
-Way points, received from the simulator, are transformed from global map coordinates to vehicle coordinates, and a 3rd-degree polynomial is fit to the points to yield a desired trajectory. To control for latency, the current state at time t is used to estimate the next state at timestep t+1, which is then passed to the MPC. 
+Way points, received from the simulator, are transformed from global map coordinates to vehicle coordinates, and a 3rd-degree polynomial is fit to the points to yield a desired trajectory. To control for latency, the current state at time t (state provided by the simulator) is used to estimate the next state at timestep t+1. This next state is then passed to the MPC [main.cpp, lines 166-203]. 
 
-The MPC calculates a cost function [MPC.cpp, lines 47-66], based on the state at t+1, and returns the actuator values that minimize the cost function. The update equations are listed below. The MPC uses these equations as constraints on the solver, taking the results from the calculated next time step and subtracting the update equation at time step t (MPC.cpp, lines 120-127) forcing the result, stored in fg, to be zero. 
+The MPC calculates a cost function [MPC.cpp, lines 50-67], based on the state at t+1, and returns the actuator values that minimize the cost function. The MPC uses equations (Figure 1) as constraints on the solver, taking the results from the calculated next timestep and subtracting the update equation at time step t (MPC.cpp, lines 120-127) forcing the result, stored in fg, to be zero. 
 
-#### Figure 3: Update Equation (taken from Lesson 19, section 6)
+#### Figure 1: Update Equation (taken from Lesson 19, section 6)
 <img src="https://github.com/bhumphrey0x20/CarND-MPC-Project/blob/master/ModelEqns.png" height="195" width="302" />
 
 
@@ -36,15 +36,15 @@ dt values between 0.15 and 0.75 tended to work the best with various N values. d
  
 
 #### Polynomial Fitting and MPC Preprocessing
-Prior to MPC processing, way points from the simulator were tranformed from global coordinates to vehilce coordinates using a Homogeneous Transformation (as discussed in the particle filter project, Lesson 14) [main.cpp, lines 115-121]. A 3rd degree polynomial was then fit to the transformed points using  the `polyfit()` function [main.cpp, lines 124]. 
+Prior to MPC processing, way points from the simulator were tranformed from global coordinates to vehilce coordinates using a Homogeneous Transformation (as discussed in the particle filter project, Lesson 14) [main.cpp, lines 141-146]. A 3rd degree polynomial was then fit to the transformed points using  the `polyfit()` function [main.cpp, lines 150]. 
 
 #### Model Predictive Control with Latency
-Following the Slack discussion [here]("https://carnd.slack.com/archives/C54DV4BK6/p1538209080000100"), a latency of 100 milliseconds was handled by calculating a new state vector for time = t+1, using the kinematic equations disscussed in Lesson 18 [main.cpp, lines 135-160]. The new state vector was then passed to the MPC. During the first new state vector calculations, the initial values of the control inputs- steering angle (`delta_1`) and acceleration (`a_1`)- were set to 0. Afterwards, the control input values returned from the MPC were stored and used in the kinematic equations during the next callback loop, to calculate the next state: basically, solving control inputs for a time, one step into the future [main.cpp, lines 166-167]. 
+Following the Slack discussion [here]("https://carnd.slack.com/archives/C54DV4BK6/p1538209080000100"), a latency of 100 milliseconds was handled by calculating a new state vector for time = t+1, using the kinematic equations disscussed in Lesson 18 [main.cpp, lines 171-186]. The new state vector was then passed to the MPC. During the first new state vector calculations, the initial values of the control inputs- steering angle (`delta_1`) and acceleration (`a_1`)- were set to 0. Afterwards, the control input values returned from the MPC were stored [main.cpp, lines 210-211] and used in the kinematic equations during the next callback loop, to calculate the next state: basically, solving control inputs for a time, one step into the future. 
 
-Staying consistent with the `dt` value in the MPC a time step `dt` of 0.15 seconds was used as a "delta t" in the kinematic equations [main.cpp, lines 19, 150-155].  
+Staying consistent with the `dt` value in the MPC, a time step `dt` of 0.15 seconds was used as a "delta t" in the kinematic equations [main.cpp, lines 36, 171-186].  
 
 ### Simulation
-The videos show the vehicle controled by the MPC using reference velocities of 40 mph, 50 mph, and 60 mph. Speeds near 40 and 50 mph were the most stable. At speeds of around 60 mph instabilities were intermittant (not shown in video), especially for distances beyond a single lap. 
+The video links below show the vehicle controled by the MPC using reference velocities of 20 mph and 30 mph. 
 
 #### MPC with Reference Velocity = 20 mph
 <a href="https://youtu.be/NVu9ff7MVhc" target="_blank"><img src="https://i.ytimg.com/vi/NVu9ff7MVhc/2.jpg" alt="Advanced Lane Finding Video" width="240" height="180" border="10" /></a>

@@ -161,8 +161,6 @@ if(write_time_data){
 //cout << "Coeff:" << endl << coeff << endl << endl;
 //cout << "cte: " << cte << endl << "epsi: " << epsi << endl;
 
-					
-
 // For Latency: Calculating future state t+1, and passing values to "curr" state to apply to solver
 //	refered to https://carnd.slack.com/archives/C54DV4BK6/p1538209080000100 for state t+1 
 // 		idea
@@ -171,10 +169,12 @@ if(write_time_data){
 					double x0 = 0; 
 					double y0 = 0; 
 					double psi0 = 0;
+		
+				//variables for state vector at time t=1, init to zero before kinematic equations		
 					double x1 = 0; 
 					double y1 = 0; 
 					double psi1 = 0; 
-					double v1=v; 
+					double v1 = 0; 
 					double cte1 = 0; 
 					double epsi1 = 0; 
 
